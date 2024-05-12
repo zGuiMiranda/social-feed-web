@@ -18,7 +18,7 @@ export const getAllPosts = async (pagination: {
 
 export const createPost = async (post: IPost) => {
   const { data } = await axiosInstance.post(
-    `${backendUrl}/${postUrl}post/create`,
+    `${backendUrl}/${postUrl}/create`,
     post
   );
   return data;

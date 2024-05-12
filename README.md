@@ -1,6 +1,6 @@
 # social-feed-web
 
-Simple feed project utilizing React, Typescript, socket.io and Redux
+Simple feed project utilizing React, Typescript, Tailwind, socket.io and Redux
 
 # social-feed-web
 

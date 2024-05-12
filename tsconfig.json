@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "store/store.ts", "store/features/post"],
+  "include": ["src", "store/store.ts", "store/features/post", "vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

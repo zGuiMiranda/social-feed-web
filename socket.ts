@@ -1,9 +1,5 @@
 import { io } from "socket.io-client";
 
-const URL = "http://localhost:8081";
+const URL = import.meta.env.VITE_SOCKET_ADDRESS;
 
-export const socket = io(URL, {
-  extraHeaders: {
-    "my-custom-header": "abcd",
-  },
-});
+export const socket = io(URL, {});

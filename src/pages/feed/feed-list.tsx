@@ -5,6 +5,7 @@ import { RootState } from "../../../store/store";
 import {
   addPost,
   getPosts,
+  loadPostFromSocketAlert,
   setNewPostAlert,
 } from "../../../store/features/post/post-slice";
 import { useAppDispatch, useAppSelector } from "../../hooks";
@@ -12,8 +13,8 @@ import { FixedSizeList } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import { socket } from "../../../socket";
 import "./feed-list.css";
-//import { IPost } from "../../shared/interfaces";
 import { TopButton } from "../../components/top-button/top-button";
+import { IPost } from "../../shared/interfaces";
 
 export const FeedList = () => {
   const postsFromRedux = useAppSelector((state: RootState) => state.post.posts);
@@ -21,34 +22,32 @@ export const FeedList = () => {
 
   const dispatch = useAppDispatch();
 
-  const [posts, setPosts] = useState<{ content: string }[]>([]);
+  const [posts, setPosts] = useState<IPost[]>([]);
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
-  const [newPostsTrigger, setNewPostsTrigger] = useState(false);
   const listRef = useRef<any>(null);
+  const userMockId = import.meta.env.VITE_CURRENT_USER_MOCK_ID;
+  const scrollToTop = () => listRef?.current?.scrollToItem(0, "center");
 
-  //const scrollToTop = () => listRef?.current?.scrollToItem(1, "center");
+  const resetScroll = () => {
+    scrollToTop();
+    setPage(1);
+  };
 
   const onCreatePost = async (content: string) => {
     await dispatch(addPost({ content }));
+    resetScroll();
   };
 
   useEffect(() => {
-    if (dispatch && page && limit) {
-      dispatch(getPosts({ page, limit }));
-      setNewPostsTrigger((prevState) => !prevState);
-    }
+    if (page && limit) dispatch(getPosts({ page, limit }));
     return () => {};
-  }, [dispatch, page, limit]);
+  }, [dispatch, limit, page]);
 
   useEffect(() => {
-    if (newPostsTrigger === true) {
-      setPosts((prevState) => [...prevState, ...postsFromRedux]);
-      setNewPostsTrigger((prevState) => !prevState);
-    }
+    setPosts(postsFromRedux);
     return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPostsTrigger]);
+  }, [postsFromRedux]);
 
   const Row = ({ index }: { index: number }) => (
     <Post key={index} content={posts?.[index]?.content} />
@@ -58,25 +57,31 @@ export const FeedList = () => {
     setPage((prevState) => prevState + 1);
   };
 
+  const resetPosts = async () => {
+    await dispatch(loadPostFromSocketAlert());
+    resetScroll();
+    dispatch(setNewPostAlert());
+  };
+
   useEffect(() => {
-    // const addNewPost = (newPost: IPost) => {
-    //   setPosts((prevState) => [newPost, ...prevState]);
-    //   scrollToTop();
-    // };
-    // socket.on("message", (newPost: IPost) => addNewPost(newPost));
-    const setPostAlert = () => {
-      dispatch(setNewPostAlert());
+    const setPostAlert = (post: IPost) => {
+      if (post.user && post.user !== userMockId) dispatch(setNewPostAlert());
     };
-    socket.on("message", () => setPostAlert());
+    socket.on("message", (post: IPost) => setPostAlert(post));
 
     return () => {
       socket.off("message");
     };
-  }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, userMockId]);
 
   return (
     <>
-      <TopButton />
+      {/* <span className="text-cyan-100">{posts.length}</span> */}
+      <TopButton
+        textWarning="New posts available. Click here to update!"
+        onClickFunction={resetPosts}
+      />
       <PostCreator publishPost={onCreatePost} />
       <InfiniteLoader
         isItemLoaded={(index) => index < posts.length}

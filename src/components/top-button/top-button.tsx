@@ -1,7 +1,12 @@
 import { useAppSelector } from "../../hooks";
 import { RootState } from "../../../store/store";
 
-export const TopButton = () => {
+interface ITopButton {
+  textWarning: string;
+  onClickFunction: () => void;
+}
+
+export const TopButton = ({ textWarning, onClickFunction }: ITopButton) => {
   const isVisible = useAppSelector(
     (state: RootState) => state.post.newPostAlert
   );
@@ -13,12 +18,13 @@ export const TopButton = () => {
           <div
             className="p-2 hover:cursor-pointer hover:bg-pink-800 bg-pink-600 items-center text-indigo-100 leading-none lg:rounded-full flex lg:inline-flex"
             role="alert"
+            onClick={() => onClickFunction()}
           >
             <span className="flex rounded-full mt-0.5  bg-black uppercase px-2 py-1 text-xs font-bold mr-3">
               Updates!
             </span>
             <span className="font-semibold mr-2 text-left flex-auto">
-              New posts available. Click here to update!
+              {textWarning}
             </span>
             <svg
               className="fill-current opacity-75 h-4 w-4"

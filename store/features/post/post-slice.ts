@@ -21,6 +21,13 @@ export const addPost = createAsyncThunk(
   }
 );
 
+export const loadPostFromSocketAlert = createAsyncThunk(
+  "post/loadPostFromSocketAlert",
+  async () => {
+    return;
+  }
+);
+
 export const getPosts = createAsyncThunk(
   "post/getPosts",
   async (data: { page: number; limit: number }) => {
@@ -41,12 +48,15 @@ export const postSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder.addCase(addPost.fulfilled, (state) => {
-      state.postsCount = state.postsCount + 1;
+      state.posts = [];
+    });
+
+    builder.addCase(loadPostFromSocketAlert.fulfilled, (state) => {
+      state.posts = [];
     });
 
     builder.addCase(getPosts.fulfilled, (state, action) => {
-      state.posts = [];
-      state.posts.push(...action.payload.data);
+      state.posts = state.posts.concat(...action.payload.data);
       state.postsCount = action.payload.count;
     });
 

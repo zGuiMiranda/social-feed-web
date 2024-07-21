@@ -7,5 +7,7 @@ Simple feed project utilizing React, Typescript, Tailwind, socket.io and Redux
 # social-feed-web
 
 pnpm install
+
+
 pnpm run dev
 
